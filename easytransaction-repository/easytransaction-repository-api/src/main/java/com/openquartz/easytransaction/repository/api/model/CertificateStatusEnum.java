@@ -1,5 +1,7 @@
 package com.openquartz.easytransaction.repository.api.model;
 
+import java.util.stream.Stream;
+
 /**
  * 凭证状态
  *
@@ -10,7 +12,7 @@ public enum CertificateStatusEnum {
     /**
      * 初始化
      */
-    INIT(0, "初始化"),
+    INIT(0, "Initial"),
 
     /**
      * Success
@@ -25,12 +27,12 @@ public enum CertificateStatusEnum {
     /**
      * confirm
      */
-    CONFIRM(30,"Confirm"),
+    CONFIRM(30, "Confirm"),
 
     /**
      * 完成
      */
-    FINISHED(90, "成功"),
+    FINISHED(90, "Finish"),
 
     ;
     private final Integer code;
@@ -47,5 +49,12 @@ public enum CertificateStatusEnum {
 
     public String getDesc() {
         return desc;
+    }
+
+    public static CertificateStatusEnum of(Integer code){
+        return Stream.of(values())
+            .filter(e->e.code.equals(code))
+            .findAny()
+            .orElse(null);
     }
 }

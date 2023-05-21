@@ -53,6 +53,7 @@ public class JdbcTransactionCertificateRepositoryImpl implements TransactionCert
     @Override
     public List<TransactionCertificate> listCompensatedTransaction(Date startRetryTime, Date lastRetryTime,
         Integer offset) {
+
         return Collections.emptyList();
     }
 }
