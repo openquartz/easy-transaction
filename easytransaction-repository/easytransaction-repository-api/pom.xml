@@ -13,7 +13,7 @@
     <artifactId>easytransaction-repository-api</artifactId>
     <packaging>jar</packaging>
 
-    <name>${project.artifactId}</name>
+    <name>${artifactId}</name>
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
     </properties>

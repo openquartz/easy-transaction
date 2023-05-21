@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.openquartz</groupId>
         <artifactId>easy-transaction</artifactId>
-        <version>1.0.0</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>easytransaction-example</artifactId>

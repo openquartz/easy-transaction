@@ -22,14 +22,14 @@ public class EasyTransactionProperties {
     private Long maxTransactionTimeout = 300000L;
 
     /**
-     * 最大重试次数
-     */
-    private Integer maxCompensateRetryCount = 5;
-
-    /**
-     * datasource
+     * datasource properties
      */
     private EasyTransactionDataSourceProperties dataSource = new EasyTransactionDataSourceProperties();
+
+    /**
+     * compensate properties
+     */
+    private EasyTransactionCompensateProperties compensate = new EasyTransactionCompensateProperties();
 
     public static class EasyTransactionDataSourceProperties {
 
@@ -106,6 +106,85 @@ public class EasyTransactionProperties {
                 ", driverClassName='" + driverClassName + '\'' +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
+                '}';
+        }
+    }
+
+    public static class EasyTransactionCompensateProperties {
+
+        /**
+         * 补偿次数
+         */
+        private Integer retryCount = 5;
+
+        /**
+         * back off hours
+         */
+        private Integer backoffHours = 1;
+
+        /**
+         *  compensate offset
+         */
+        private Integer offset = 500;
+
+        /**
+         * compensate init delay
+         */
+        private Integer initDelay = 30;
+
+        /**
+         * compensate recovery delay
+         */
+        private Integer recoveryDelay = 60;
+
+        public Integer getRetryCount() {
+            return retryCount;
+        }
+
+        public void setRetryCount(Integer retryCount) {
+            this.retryCount = retryCount;
+        }
+
+        public Integer getBackoffHours() {
+            return backoffHours;
+        }
+
+        public void setBackoffHours(Integer backoffHours) {
+            this.backoffHours = backoffHours;
+        }
+
+        public Integer getOffset() {
+            return offset;
+        }
+
+        public void setOffset(Integer offset) {
+            this.offset = offset;
+        }
+
+        public Integer getInitDelay() {
+            return initDelay;
+        }
+
+        public void setInitDelay(Integer initDelay) {
+            this.initDelay = initDelay;
+        }
+
+        public Integer getRecoveryDelay() {
+            return recoveryDelay;
+        }
+
+        public void setRecoveryDelay(Integer recoveryDelay) {
+            this.recoveryDelay = recoveryDelay;
+        }
+
+        @Override
+        public String toString() {
+            return "EasyTransactionCompensateProperties{" +
+                "retryCount=" + retryCount +
+                ", backoffHours=" + backoffHours +
+                ", offset=" + offset +
+                ", initDelay=" + initDelay +
+                ", recoveryDelay=" + recoveryDelay +
                 '}';
         }
     }

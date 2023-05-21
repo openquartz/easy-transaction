@@ -27,7 +27,7 @@ public class TccTriggerImpl implements TccTrigger {
 
         if (Objects.isNull(transactionCertificate.getCancelMethod())) {
             transactionSupport.executeNewTransaction(() -> {
-                transactionCertificateRepository.finished(transactionCertificate);
+                transactionCertificateRepository.finish(transactionCertificate);
                 return true;
             });
             return;
@@ -44,7 +44,7 @@ public class TccTriggerImpl implements TccTrigger {
 
             // finished
             transactionSupport.executeNewTransaction(() -> {
-                transactionCertificateRepository.finished(transactionCertificate);
+                transactionCertificateRepository.finish(transactionCertificate);
                 return true;
             });
         } catch (Throwable ex) {
@@ -63,7 +63,7 @@ public class TccTriggerImpl implements TccTrigger {
 
         if (Objects.isNull(transactionCertificate.getConfirmMethod())) {
             transactionSupport.executeNewTransaction(() -> {
-                transactionCertificateRepository.finished(transactionCertificate);
+                transactionCertificateRepository.finish(transactionCertificate);
                 return true;
             });
             return;
@@ -74,7 +74,7 @@ public class TccTriggerImpl implements TccTrigger {
 
             // finished
             transactionSupport.executeNewTransaction(() -> {
-                transactionCertificateRepository.finished(transactionCertificate);
+                transactionCertificateRepository.finish(transactionCertificate);
                 return true;
             });
 

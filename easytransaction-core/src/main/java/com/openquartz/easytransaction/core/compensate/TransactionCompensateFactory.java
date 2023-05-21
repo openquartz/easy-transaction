@@ -5,7 +5,7 @@ import com.openquartz.easytransaction.repository.api.model.TransactionCertificat
 /**
  * 事务补偿
  */
-public interface TransactionCompensate {
+public interface TransactionCompensateFactory {
 
     /**
      * 补偿

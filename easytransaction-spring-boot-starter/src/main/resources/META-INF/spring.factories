@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.openquartz.easytransaction.starter.spring.boot.autoconfig.EasyTransactionAutoConfig

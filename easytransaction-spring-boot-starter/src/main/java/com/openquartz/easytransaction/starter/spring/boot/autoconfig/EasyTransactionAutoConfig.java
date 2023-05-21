@@ -1,5 +1,9 @@
 package com.openquartz.easytransaction.starter.spring.boot.autoconfig;
 
+import com.openquartz.easytransaction.core.compensate.ScheduledTransactionCompensate;
+import com.openquartz.easytransaction.core.compensate.TransactionCompensateFactory;
+import com.openquartz.easytransaction.core.compensate.TransactionCompensateFactoryImpl;
+import com.openquartz.easytransaction.core.compensate.property.TransactionProperties;
 import com.openquartz.easytransaction.core.generator.DefaultGlobalTransactionIdGeneratorImpl;
 import com.openquartz.easytransaction.core.generator.GlobalTransactionIdGenerator;
 import com.openquartz.easytransaction.core.transaction.TransactionSupport;
@@ -39,13 +43,13 @@ public class EasyTransactionAutoConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public GlobalTransactionIdGenerator globalTransactionIdGenerator(){
+    public GlobalTransactionIdGenerator globalTransactionIdGenerator() {
         return new DefaultGlobalTransactionIdGeneratorImpl();
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public TransactionSupport transactionSupport(){
+    public TransactionSupport transactionSupport() {
         return new SpringTransactionSupport();
     }
 
@@ -53,8 +57,8 @@ public class EasyTransactionAutoConfig {
     @ConditionalOnMissingBean(type = "localStorageJdbcTemplate", value = JdbcTemplate.class)
     public JdbcTemplate jdbcTemplate(EasyTransactionProperties easyTransactionProperties,
         Environment environment,
-        @Autowired(required = false)DataSource dataSource) {
-        if (dataSource!=null){
+        @Autowired(required = false) DataSource dataSource) {
+        if (dataSource != null) {
             return new JdbcTemplate(dataSource);
         }
         return new JdbcTemplate(newLocalStorageDataSource(easyTransactionProperties.getDataSource(), environment));
@@ -66,7 +70,7 @@ public class EasyTransactionAutoConfig {
         Iterable<ConfigurationPropertySource> sources = ConfigurationPropertySources
             .get(environment);
         Binder binder = new Binder(sources);
-        Properties properties = binder.bind(EasyTransactionProperties.PREFIX+".datasource", Properties.class).get();
+        Properties properties = binder.bind(EasyTransactionProperties.PREFIX + ".datasource", Properties.class).get();
 
         DataSource dataSource = buildDataSource(easyFileLocalProperties);
         buildDataSourceProperties(dataSource, properties);
@@ -106,14 +110,15 @@ public class EasyTransactionAutoConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public TransactionCertificateRepository transactionCertificateRepository(JdbcTemplate jdbcTemplate){
+    public TransactionCertificateRepository transactionCertificateRepository(JdbcTemplate jdbcTemplate) {
         return new JdbcTransactionCertificateRepositoryImpl(jdbcTemplate);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public TccTrigger tccTrigger(TransactionSupport transactionSupport, TransactionCertificateRepository transactionCertificateRepository){
-        return new TccTriggerImpl(transactionSupport,transactionCertificateRepository);
+    public TccTrigger tccTrigger(TransactionSupport transactionSupport,
+        TransactionCertificateRepository transactionCertificateRepository) {
+        return new TccTriggerImpl(transactionSupport, transactionCertificateRepository);
     }
 
     @Bean
@@ -122,13 +127,50 @@ public class EasyTransactionAutoConfig {
         GlobalTransactionIdGenerator globalTransactionIdGenerator,
         TransactionSupport transactionSupport,
         TransactionCertificateRepository transactionCertificateRepository,
-        EasyTransactionProperties  easyTransactionProperties
+        EasyTransactionProperties easyTransactionProperties
     ) {
         TccTryMethodInterceptor interceptor = new TccTryMethodInterceptor(tccTrigger, globalTransactionIdGenerator,
             transactionSupport, transactionCertificateRepository);
         TccAnnotationAdvisor advisor = new TccAnnotationAdvisor(interceptor);
         advisor.setOrder(easyTransactionProperties.getTransactionAdvisorOrder());
         return advisor;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TransactionCompensateFactory transactionCompensateFactory(TccTrigger tccTrigger,
+        EasyTransactionProperties easyTransactionProperties,
+        TransactionCertificateRepository transactionCertificateRepository) {
+
+        TransactionProperties transactionProperties = buildTransactionProperties(easyTransactionProperties);
+
+        return new TransactionCompensateFactoryImpl(tccTrigger, transactionProperties,
+            transactionCertificateRepository);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ScheduledTransactionCompensate scheduledTransactionCompensate(
+        TransactionCertificateRepository transactionCertificateRepository,
+        EasyTransactionProperties easyTransactionProperties,
+        TransactionCompensateFactory transactionCompensateFactory) {
+
+        TransactionProperties transactionProperties = buildTransactionProperties(easyTransactionProperties);
+
+        return new ScheduledTransactionCompensate(transactionCertificateRepository, transactionProperties,
+            transactionCompensateFactory);
+    }
+
+    private static TransactionProperties buildTransactionProperties(
+        EasyTransactionProperties easyTransactionProperties) {
+        TransactionProperties transactionProperties = new TransactionProperties();
+        transactionProperties.setMaxTransactionTimeout(easyTransactionProperties.getMaxTransactionTimeout());
+        transactionProperties.setCompensateRetryCount(easyTransactionProperties.getCompensate().getRetryCount());
+        transactionProperties.setCompensateBackOffHours(easyTransactionProperties.getCompensate().getBackoffHours());
+        transactionProperties.setCompensateOffset(easyTransactionProperties.getCompensate().getOffset());
+        transactionProperties.setCompensateInitDelay(easyTransactionProperties.getCompensate().getInitDelay());
+        transactionProperties.setCompensateRecoveryDelay(easyTransactionProperties.getCompensate().getRecoveryDelay());
+        return transactionProperties;
     }
 
 }

@@ -11,13 +11,13 @@ import com.openquartz.easytransaction.core.trigger.TccTrigger;
  *
  * @author svnee
  */
-public class TransactionCompensateImpl implements TransactionCompensate {
+public class TransactionCompensateFactoryImpl implements TransactionCompensateFactory {
 
     private final TccTrigger tccTrigger;
     private final TransactionProperties transactionProperties;
     private final TransactionCertificateRepository transactionCertificateRepository;
 
-    public TransactionCompensateImpl(TccTrigger tccTrigger, TransactionProperties transactionProperties,
+    public TransactionCompensateFactoryImpl(TccTrigger tccTrigger, TransactionProperties transactionProperties,
         TransactionCertificateRepository transactionCertificateRepository) {
         this.tccTrigger = tccTrigger;
         this.transactionProperties = transactionProperties;
@@ -29,7 +29,7 @@ public class TransactionCompensateImpl implements TransactionCompensate {
 
         // has finished
         if (transactionCertificate.isFinished()
-            || transactionCertificate.getRetryCount() >= transactionProperties.getMaxTransactionRetry()) {
+            || transactionCertificate.getRetryCount() >= transactionProperties.getCompensateRetryCount()) {
             return;
         }
 

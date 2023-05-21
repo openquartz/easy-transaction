@@ -38,7 +38,7 @@ public class JdbcTransactionCertificateRepositoryImpl implements TransactionCert
     }
 
     @Override
-    public void finished(TransactionCertificate transactionCertificate) {
+    public void finish(TransactionCertificate transactionCertificate) {
 
     }
 
@@ -46,4 +46,6 @@ public class JdbcTransactionCertificateRepositoryImpl implements TransactionCert
     public void startRetry(TransactionCertificate transactionCertificate) {
 
     }
+
+    
 }

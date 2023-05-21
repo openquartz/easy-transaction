@@ -11,8 +11,27 @@ public class TransactionProperties {
     private Long maxTransactionTimeout;
 
     /**
-     * 最大重试次数
+     * 补偿最大重试次数
      */
-    private Integer maxTransactionRetry;
+    private Integer compensateRetryCount;
 
+    /**
+     * 回溯时间 单位:小时
+     */
+    private Integer compensateBackOffHours = 1;
+
+    /**
+     *  compensate offset
+     */
+    private Integer compensateOffset = 500;
+
+    /**
+     * compensate init delay
+     */
+    private Integer compensateInitDelay = 30;
+
+    /**
+     * compensate recovery delay
+     */
+    private Integer compensateRecoveryDelay = 60;
 }
