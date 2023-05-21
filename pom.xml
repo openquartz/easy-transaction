@@ -10,7 +10,7 @@
     <version>${revision}</version>
 
     <modules>
-        <module>easytransaction-spring</module>
+        <module>easytransaction-core</module>
         <module>easytransaction-repository</module>
         <module>easytransaction-spring-boot-starter</module>
         <module>easytransaction-example</module>
@@ -69,15 +69,21 @@
                 <version>${disruptor.version}</version>
             </dependency>
 
-<!--            <dependency>-->
-<!--                <groupId>com.fasterxml.jackson.module</groupId>-->
-<!--                <artifactId>jackson-modules-java8</artifactId>-->
-<!--                <version>2.11.1</version>-->
-<!--            </dependency>-->
-
             <dependency>
                 <groupId>com.openquartz</groupId>
                 <artifactId>easytransaction-repository-api</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.openquartz</groupId>
+                <artifactId>easytransaction-repository-jdbc</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.openquartz</groupId>
+                <artifactId>easytransaction-core</artifactId>
                 <version>${revision}</version>
             </dependency>
 
