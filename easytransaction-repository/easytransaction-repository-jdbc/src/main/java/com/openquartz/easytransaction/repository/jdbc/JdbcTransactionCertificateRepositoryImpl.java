@@ -2,6 +2,9 @@ package com.openquartz.easytransaction.repository.jdbc;
 
 import com.openquartz.easytransaction.repository.api.TransactionCertificateRepository;
 import com.openquartz.easytransaction.repository.api.model.TransactionCertificate;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
@@ -47,5 +50,9 @@ public class JdbcTransactionCertificateRepositoryImpl implements TransactionCert
 
     }
 
-    
+    @Override
+    public List<TransactionCertificate> listCompensatedTransaction(Date startRetryTime, Date lastRetryTime,
+        Integer offset) {
+        return Collections.emptyList();
+    }
 }
