@@ -1,13 +1,12 @@
-package com.openquartz.easytransaction.core.common.json;
+package com.openquartz.easytransaction.common.json;
 
-
-import static com.openquartz.easytransaction.core.common.exception.ExceptionUtils.rethrow;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.openquartz.easytransaction.common.exception.ExceptionUtils;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -48,7 +47,7 @@ public abstract class JacksonHandler implements JsonFacade {
         try {
             return mapper.writeValueAsString(obj);
         } catch (JsonProcessingException e) {
-            return rethrow(e);
+            return ExceptionUtils.rethrow(e);
         }
     }
 
@@ -57,7 +56,7 @@ public abstract class JacksonHandler implements JsonFacade {
         try {
             return mapper.readValue(text, clazz);
         } catch (IOException e) {
-            return rethrow(e);
+            return ExceptionUtils.rethrow(e);
         }
     }
 
@@ -66,7 +65,7 @@ public abstract class JacksonHandler implements JsonFacade {
         try {
             return mapper.readValue(json, type);
         } catch (IOException e) {
-            return rethrow(e);
+            return ExceptionUtils.rethrow(e);
         }
     }
 
@@ -77,7 +76,7 @@ public abstract class JacksonHandler implements JsonFacade {
             JavaType javaType = mapper.getTypeFactory().constructType(type);
             return mapper.readValue(text, javaType);
         } catch (IOException e) {
-            return rethrow(e);
+            return ExceptionUtils.rethrow(e);
         }
     }
 
@@ -88,7 +87,7 @@ public abstract class JacksonHandler implements JsonFacade {
             JavaType javaType = mapper.getTypeFactory().constructType(type);
             return mapper.readValue(json, javaType);
         } catch (IOException e) {
-            return rethrow(e);
+            return ExceptionUtils.rethrow(e);
         }
     }
 
@@ -107,7 +106,7 @@ public abstract class JacksonHandler implements JsonFacade {
         try {
             return mapper.writeValueAsBytes(obj);
         } catch (JsonProcessingException e) {
-            return rethrow(e);
+            return ExceptionUtils.rethrow(e);
         }
     }
 
@@ -118,7 +117,7 @@ public abstract class JacksonHandler implements JsonFacade {
             CollectionType javaType = typeFactory.constructCollectionType(collectionType, elementType);
             return mapper.readValue(json, javaType);
         } catch (IOException e) {
-            return rethrow(e);
+            return ExceptionUtils.rethrow(e);
         }
     }
 }

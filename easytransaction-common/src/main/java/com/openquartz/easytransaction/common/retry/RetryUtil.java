@@ -1,6 +1,6 @@
-package com.openquartz.easytransaction.core.common.retry;
+package com.openquartz.easytransaction.common.retry;
 
-import com.openquartz.easytransaction.core.common.exception.ExceptionUtils;
+import com.openquartz.easytransaction.common.exception.ExceptionUtils;
 import java.util.function.Supplier;
 
 /**

@@ -34,14 +34,16 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-json</artifactId>
+            <groupId>com.openquartz</groupId>
+            <artifactId>easytransaction-common</artifactId>
         </dependency>
 
         <dependency>
             <groupId>com.openquartz</groupId>
             <artifactId>easytransaction-repository-api</artifactId>
         </dependency>
+
+
 
     </dependencies>
 

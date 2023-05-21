@@ -1,4 +1,4 @@
-package com.openquartz.easytransaction.core.common.json;
+package com.openquartz.easytransaction.common.json;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

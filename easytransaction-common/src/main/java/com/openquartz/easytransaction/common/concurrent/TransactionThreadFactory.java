@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.openquartz.easytransaction.core.common.concurrent;
+package com.openquartz.easytransaction.common.concurrent;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;

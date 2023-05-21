@@ -1,6 +1,6 @@
 package com.openquartz.easytransaction.core.compensate;
 
-import com.openquartz.easytransaction.core.common.concurrent.TransactionThreadFactory;
+import com.openquartz.easytransaction.common.concurrent.TransactionThreadFactory;
 import com.openquartz.easytransaction.core.compensate.property.TransactionProperties;
 import com.openquartz.easytransaction.repository.api.TransactionCertificateRepository;
 import com.openquartz.easytransaction.repository.api.model.TransactionCertificate;

@@ -1,5 +1,7 @@
 package com.openquartz.easytransaction.repository.api.model;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -56,5 +58,19 @@ public enum CertificateStatusEnum {
             .filter(e->e.code.equals(code))
             .findAny()
             .orElse(null);
+    }
+
+    private static final List<CertificateStatusEnum> PROCESSING_CERTIFICATE_STATUS_LIST;
+
+    static {
+        PROCESSING_CERTIFICATE_STATUS_LIST =  new ArrayList<>();
+        PROCESSING_CERTIFICATE_STATUS_LIST.add(CertificateStatusEnum.INIT);
+        PROCESSING_CERTIFICATE_STATUS_LIST.add(CertificateStatusEnum.TRY_SUCCESS);
+        PROCESSING_CERTIFICATE_STATUS_LIST.add(CertificateStatusEnum.CONFIRM);
+        PROCESSING_CERTIFICATE_STATUS_LIST.add(CertificateStatusEnum.CANCEL);
+    }
+
+    public static List<CertificateStatusEnum> getProcessingCertificateStatusList() {
+        return PROCESSING_CERTIFICATE_STATUS_LIST;
     }
 }

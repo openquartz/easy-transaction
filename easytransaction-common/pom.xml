@@ -6,17 +6,15 @@
 
     <parent>
         <groupId>com.openquartz</groupId>
-        <artifactId>easytransaction-repository</artifactId>
+        <artifactId>easy-transaction</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>easytransaction-repository-jdbc</artifactId>
+    <artifactId>easytransaction-common</artifactId>
     <packaging>jar</packaging>
 
     <name>${project.artifactId}</name>
-    <properties>
-        <maven.deploy.skip>true</maven.deploy.skip>
-    </properties>
+    <description>${project.artifactId}</description>
 
     <dependencies>
 
@@ -26,23 +24,13 @@
         </dependency>
 
         <dependency>
-            <groupId>javax.persistence</groupId>
-            <artifactId>javax.persistence-api</artifactId>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jdbc</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.openquartz</groupId>
-            <artifactId>easytransaction-repository-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.openquartz</groupId>
-            <artifactId>easytransaction-common</artifactId>
+            <artifactId>spring-boot-starter-json</artifactId>
         </dependency>
 
     </dependencies>
@@ -89,4 +77,5 @@
             </plugins>
         </pluginManagement>
     </build>
+
 </project>

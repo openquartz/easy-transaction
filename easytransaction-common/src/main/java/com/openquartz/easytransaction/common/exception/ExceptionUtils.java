@@ -1,4 +1,4 @@
-package com.openquartz.easytransaction.core.common.exception;
+package com.openquartz.easytransaction.common.exception;
 
 import java.util.ArrayList;
 import java.util.List;

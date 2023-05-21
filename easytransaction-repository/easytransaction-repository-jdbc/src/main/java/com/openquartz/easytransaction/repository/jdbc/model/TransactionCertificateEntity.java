@@ -5,6 +5,11 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import lombok.Data;
 
+/**
+ * Entity
+ *
+ * @author svnee
+ */
 @Data
 @Table(name = "et_transaction_certificate_entity")
 public class TransactionCertificateEntity {
@@ -45,7 +50,7 @@ public class TransactionCertificateEntity {
     /**
      * param
      */
-    private Object param;
+    private String param;
 
     /**
      * 取消 method

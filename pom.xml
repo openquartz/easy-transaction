@@ -14,6 +14,7 @@
         <module>easytransaction-repository</module>
         <module>easytransaction-spring-boot-starter</module>
         <module>easytransaction-example</module>
+        <module>easytransaction-common</module>
     </modules>
 
     <name>${project.artifactId}</name>
@@ -84,6 +85,12 @@
             <dependency>
                 <groupId>com.openquartz</groupId>
                 <artifactId>easytransaction-core</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.openquartz</groupId>
+                <artifactId>easytransaction-common</artifactId>
                 <version>${revision}</version>
             </dependency>
 
