@@ -2,6 +2,8 @@ package com.openquartz.easytransaction.repository.jdbc;
 
 import com.openquartz.easytransaction.repository.api.TransactionCertificateRepository;
 import com.openquartz.easytransaction.repository.api.model.TransactionCertificate;
+import com.openquartz.easytransaction.repository.jdbc.model.TransactionCertificateEntity;
+import com.openquartz.easytransaction.repository.jdbc.translator.TransactionCertificateTranslator;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -22,6 +24,12 @@ public class JdbcTransactionCertificateRepositoryImpl implements TransactionCert
 
     @Override
     public void save(TransactionCertificate transactionCertificate) {
+        TransactionCertificateEntity entity = TransactionCertificateTranslator.translate2Entity(transactionCertificate);
+
+        save(entity);
+    }
+
+    private void save(TransactionCertificateEntity transactionCertificateEntity) {
 
     }
 
