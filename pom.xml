@@ -15,6 +15,7 @@
         <module>easytransaction-spring-boot-starter</module>
         <module>easytransaction-example</module>
         <module>easytransaction-common</module>
+        <module>easytransaction-example/easytransaction-example-tcc</module>
     </modules>
 
     <name>${project.artifactId}</name>
@@ -43,6 +44,7 @@
     </properties>
     <dependencyManagement>
         <dependencies>
+
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
