@@ -15,7 +15,7 @@
         <module>easytransaction-spring-boot-starter</module>
         <module>easytransaction-example</module>
         <module>easytransaction-common</module>
-        <module>easytransaction-example/easytransaction-example-tcc</module>
+        <module>easytransaction-example</module>
     </modules>
 
     <name>${project.artifactId}</name>
@@ -27,7 +27,7 @@
         <reflections.version>0.9.10</reflections.version>
         <disruptor.version>3.4.2</disruptor.version>
 
-        <spring-boot.version>2.3.2.RELEASE</spring-boot.version>
+        <spring-boot.version>2.1.8.RELEASE</spring-boot.version>
 
         <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
