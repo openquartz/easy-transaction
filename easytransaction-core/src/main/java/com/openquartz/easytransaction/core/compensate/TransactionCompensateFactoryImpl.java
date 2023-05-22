@@ -4,7 +4,7 @@ import com.openquartz.easytransaction.repository.api.TransactionCertificateRepos
 import com.openquartz.easytransaction.repository.api.model.CertificateStatusEnum;
 import com.openquartz.easytransaction.repository.api.model.TransactionCertificate;
 import com.openquartz.easytransaction.core.compensate.property.TransactionProperties;
-import com.openquartz.easytransaction.core.trigger.TccTrigger;
+import com.openquartz.easytransaction.core.trigger.TccTriggerEngine;
 
 /**
  * Compensate implementation
@@ -13,13 +13,13 @@ import com.openquartz.easytransaction.core.trigger.TccTrigger;
  */
 public class TransactionCompensateFactoryImpl implements TransactionCompensateFactory {
 
-    private final TccTrigger tccTrigger;
+    private final TccTriggerEngine tccTriggerEngine;
     private final TransactionProperties transactionProperties;
     private final TransactionCertificateRepository transactionCertificateRepository;
 
-    public TransactionCompensateFactoryImpl(TccTrigger tccTrigger, TransactionProperties transactionProperties,
+    public TransactionCompensateFactoryImpl(TccTriggerEngine tccTriggerEngine, TransactionProperties transactionProperties,
         TransactionCertificateRepository transactionCertificateRepository) {
-        this.tccTrigger = tccTrigger;
+        this.tccTriggerEngine = tccTriggerEngine;
         this.transactionProperties = transactionProperties;
         this.transactionCertificateRepository = transactionCertificateRepository;
     }
@@ -45,9 +45,9 @@ public class TransactionCompensateFactoryImpl implements TransactionCompensateFa
             return;
         }
         if (transactionCertificate.getCertificateStatus() == CertificateStatusEnum.CONFIRM) {
-            tccTrigger.confirm(transactionCertificate);
+            tccTriggerEngine.confirm(transactionCertificate);
         } else {
-            tccTrigger.cancel(transactionCertificate);
+            tccTriggerEngine.cancel(transactionCertificate);
         }
     }
 }

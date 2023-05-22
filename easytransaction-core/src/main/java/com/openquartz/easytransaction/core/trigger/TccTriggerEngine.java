@@ -2,7 +2,7 @@ package com.openquartz.easytransaction.core.trigger;
 
 import com.openquartz.easytransaction.repository.api.model.TransactionCertificate;
 
-public interface TccTrigger {
+public interface TccTriggerEngine {
 
     /**
      * cancel

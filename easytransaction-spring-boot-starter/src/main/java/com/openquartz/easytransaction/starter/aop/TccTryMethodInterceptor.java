@@ -9,7 +9,7 @@ import com.openquartz.easytransaction.repository.api.model.TransactionCertificat
 import com.openquartz.easytransaction.core.annotation.Tcc;
 import com.openquartz.easytransaction.core.generator.GlobalTransactionIdGenerator;
 import com.openquartz.easytransaction.core.transaction.TransactionSupport;
-import com.openquartz.easytransaction.core.trigger.TccTrigger;
+import com.openquartz.easytransaction.core.trigger.TccTriggerEngine;
 import java.lang.reflect.Method;
 import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
@@ -24,16 +24,16 @@ import org.aopalliance.intercept.MethodInvocation;
 @Slf4j
 public class TccTryMethodInterceptor implements MethodInterceptor {
 
-    private final TccTrigger tccTrigger;
+    private final TccTriggerEngine tccTriggerEngine;
     private final GlobalTransactionIdGenerator globalTransactionIdGenerator;
     private final TransactionSupport transactionSupport;
     private final TransactionCertificateRepository transactionCertificateRepository;
 
-    public TccTryMethodInterceptor(TccTrigger tccTrigger,
+    public TccTryMethodInterceptor(TccTriggerEngine tccTriggerEngine,
         GlobalTransactionIdGenerator globalTransactionIdGenerator,
         TransactionSupport transactionSupport,
         TransactionCertificateRepository transactionCertificateRepository) {
-        this.tccTrigger = tccTrigger;
+        this.tccTriggerEngine = tccTriggerEngine;
         this.globalTransactionIdGenerator = globalTransactionIdGenerator;
         this.transactionSupport = transactionSupport;
         this.transactionCertificateRepository = transactionCertificateRepository;
@@ -85,10 +85,10 @@ public class TccTryMethodInterceptor implements MethodInterceptor {
         });
 
         // confirm
-        transactionSupport.executeAfterCommit(() -> tccTrigger.confirm(transactionCertificate));
+        transactionSupport.executeAfterCommit(() -> tccTriggerEngine.confirm(transactionCertificate));
 
         // cancel
-        transactionSupport.executeAfterRollback(() -> tccTrigger.cancel(transactionCertificate));
+        transactionSupport.executeAfterRollback(() -> tccTriggerEngine.cancel(transactionCertificate));
         return transactionCertificate;
     }
 

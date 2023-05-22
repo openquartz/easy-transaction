@@ -7,8 +7,8 @@ import com.openquartz.easytransaction.core.compensate.property.TransactionProper
 import com.openquartz.easytransaction.core.generator.DefaultGlobalTransactionIdGeneratorImpl;
 import com.openquartz.easytransaction.core.generator.GlobalTransactionIdGenerator;
 import com.openquartz.easytransaction.core.transaction.TransactionSupport;
-import com.openquartz.easytransaction.core.trigger.TccTrigger;
-import com.openquartz.easytransaction.core.trigger.TccTriggerImpl;
+import com.openquartz.easytransaction.core.trigger.TccTriggerEngine;
+import com.openquartz.easytransaction.core.trigger.TccTriggerEngineImpl;
 import com.openquartz.easytransaction.repository.api.TransactionCertificateRepository;
 import com.openquartz.easytransaction.repository.jdbc.JdbcTransactionCertificateRepositoryImpl;
 import com.openquartz.easytransaction.starter.aop.TccAnnotationAdvisor;
@@ -116,20 +116,20 @@ public class EasyTransactionAutoConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public TccTrigger tccTrigger(TransactionSupport transactionSupport,
+    public TccTriggerEngine tccTrigger(TransactionSupport transactionSupport,
         TransactionCertificateRepository transactionCertificateRepository) {
-        return new TccTriggerImpl(transactionSupport, transactionCertificateRepository);
+        return new TccTriggerEngineImpl(transactionSupport, transactionCertificateRepository);
     }
 
     @Bean
     @Role(value = BeanDefinition.ROLE_INFRASTRUCTURE)
-    public Advisor fileExportExecutorAnnotationAdvisor(TccTrigger tccTrigger,
+    public Advisor fileExportExecutorAnnotationAdvisor(TccTriggerEngine tccTriggerEngine,
         GlobalTransactionIdGenerator globalTransactionIdGenerator,
         TransactionSupport transactionSupport,
         TransactionCertificateRepository transactionCertificateRepository,
         EasyTransactionProperties easyTransactionProperties
     ) {
-        TccTryMethodInterceptor interceptor = new TccTryMethodInterceptor(tccTrigger, globalTransactionIdGenerator,
+        TccTryMethodInterceptor interceptor = new TccTryMethodInterceptor(tccTriggerEngine, globalTransactionIdGenerator,
             transactionSupport, transactionCertificateRepository);
         TccAnnotationAdvisor advisor = new TccAnnotationAdvisor(interceptor);
         advisor.setOrder(easyTransactionProperties.getTransactionAdvisorOrder());
@@ -138,13 +138,13 @@ public class EasyTransactionAutoConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public TransactionCompensateFactory transactionCompensateFactory(TccTrigger tccTrigger,
+    public TransactionCompensateFactory transactionCompensateFactory(TccTriggerEngine tccTriggerEngine,
         EasyTransactionProperties easyTransactionProperties,
         TransactionCertificateRepository transactionCertificateRepository) {
 
         TransactionProperties transactionProperties = buildTransactionProperties(easyTransactionProperties);
 
-        return new TransactionCompensateFactoryImpl(tccTrigger, transactionProperties,
+        return new TransactionCompensateFactoryImpl(tccTriggerEngine, transactionProperties,
             transactionCertificateRepository);
     }
 

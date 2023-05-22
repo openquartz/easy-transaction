@@ -7,12 +7,12 @@ import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class TccTriggerImpl implements TccTrigger {
+public class TccTriggerEngineImpl implements TccTriggerEngine {
 
     private final TransactionSupport transactionSupport;
     private final TransactionCertificateRepository transactionCertificateRepository;
 
-    public TccTriggerImpl(TransactionSupport transactionSupport,
+    public TccTriggerEngineImpl(TransactionSupport transactionSupport,
         TransactionCertificateRepository transactionCertificateRepository) {
         this.transactionSupport = transactionSupport;
         this.transactionCertificateRepository = transactionCertificateRepository;
