@@ -104,20 +104,20 @@ public class JdbcTransactionCertificateRepositoryImpl implements TransactionCert
     }
 
     @Override
-    public void startRetry(TransactionCertificate transactionCertificate) {
-
-        transactionCertificate.setUpdatedTime(new Date());
-        transactionCertificate.setRetryCount(transactionCertificate.getRetryCount() + 1);
+    public boolean startRetry(TransactionCertificate transactionCertificate) {
 
         String transactionId = transactionCertificate.getTransactionId();
         int affectedRow = jdbcTemplate.update(START_RETRY_SQL,
             transactionId,
             transactionCertificate.getVersion());
         if (affectedRow <= 0) {
-            throw new RuntimeException("Failed to finish transaction certificate status");
+            return false;
         }
 
+        transactionCertificate.setUpdatedTime(new Date());
+        transactionCertificate.setRetryCount(transactionCertificate.getRetryCount() + 1);
         transactionCertificate.setVersion(transactionCertificate.getVersion() + 1);
+        return true;
     }
 
     @Override

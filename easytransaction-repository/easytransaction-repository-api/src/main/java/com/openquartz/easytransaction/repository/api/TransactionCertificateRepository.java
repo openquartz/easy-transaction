@@ -46,7 +46,7 @@ public interface TransactionCertificateRepository {
      *
      * @param transactionCertificate transactionCertificate
      */
-    void startRetry(TransactionCertificate transactionCertificate);
+    boolean startRetry(TransactionCertificate transactionCertificate);
 
     /**
      * need to compensate exception transaction

@@ -40,7 +40,10 @@ public class TransactionCompensateFactoryImpl implements TransactionCompensateFa
         }
 
         // confirm transaction or cancel
-        transactionCertificateRepository.startRetry(transactionCertificate);
+        boolean retry = transactionCertificateRepository.startRetry(transactionCertificate);
+        if (!retry) {
+            return;
+        }
         if (transactionCertificate.getCertificateStatus() == CertificateStatusEnum.CONFIRM) {
             tccTrigger.confirm(transactionCertificate);
         } else {
