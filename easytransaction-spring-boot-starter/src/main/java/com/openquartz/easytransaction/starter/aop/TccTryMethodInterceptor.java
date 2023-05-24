@@ -10,8 +10,11 @@ import com.openquartz.easytransaction.core.annotation.Tcc;
 import com.openquartz.easytransaction.core.generator.GlobalTransactionIdGenerator;
 import com.openquartz.easytransaction.core.transaction.TransactionSupport;
 import com.openquartz.easytransaction.core.trigger.TccTriggerEngine;
+
 import java.lang.reflect.Method;
 import java.util.Date;
+import java.util.concurrent.*;
+
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -30,9 +33,9 @@ public class TccTryMethodInterceptor implements MethodInterceptor {
     private final TransactionCertificateRepository transactionCertificateRepository;
 
     public TccTryMethodInterceptor(TccTriggerEngine tccTriggerEngine,
-        GlobalTransactionIdGenerator globalTransactionIdGenerator,
-        TransactionSupport transactionSupport,
-        TransactionCertificateRepository transactionCertificateRepository) {
+                                   GlobalTransactionIdGenerator globalTransactionIdGenerator,
+                                   TransactionSupport transactionSupport,
+                                   TransactionCertificateRepository transactionCertificateRepository) {
         this.tccTriggerEngine = tccTriggerEngine;
         this.globalTransactionIdGenerator = globalTransactionIdGenerator;
         this.transactionSupport = transactionSupport;
@@ -46,22 +49,7 @@ public class TccTryMethodInterceptor implements MethodInterceptor {
         TransactionCertificate transactionCertificate = registerTccMethodInLocalTransaction(invocation);
 
         Tcc annotation = invocation.getMethod().getDeclaredAnnotation(Tcc.class);
-        Object tryResult = null;
-        if (annotation.retryCount() > 0) {
-            tryResult = RetryUtil.retry(annotation.retryCount(), annotation.retryInterval(), () -> {
-                try {
-                    return invocation.proceed();
-                } catch (Throwable e) {
-                    return ExceptionUtils.rethrow(e);
-                }
-            });
-        } else {
-            try {
-                tryResult = invocation.proceed();
-            } catch (Throwable e) {
-                ExceptionUtils.rethrow(e);
-            }
-        }
+        Object tryResult = executeTryMethod(invocation, annotation);
 
         // try success
         transactionSupport.executeNewTransaction(() -> {
@@ -76,6 +64,32 @@ public class TccTryMethodInterceptor implements MethodInterceptor {
         });
 
         return tryResult;
+    }
+
+    private Object executeTryMethod(MethodInvocation invocation, Tcc annotation) {
+
+        // 执行次数
+        int retryCount = (annotation.retryCount() > 0) ? annotation.retryCount() + 1 : 1;
+
+        // new a thread pool
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Future<Object> future = executor.submit(() -> RetryUtil.retry(retryCount, annotation.retryInterval(), () -> {
+            try {
+                return invocation.proceed();
+            } catch (Throwable e) {
+                return ExceptionUtils.rethrow(e);
+            }
+        }));
+        try {
+            return future.get(annotation.timeout(), TimeUnit.MICROSECONDS);
+        } catch (TimeoutException | ExecutionException e) {
+            return ExceptionUtils.rethrow(e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return ExceptionUtils.rethrow(e);
+        } finally {
+            executor.shutdownNow();
+        }
     }
 
     private TransactionCertificate registerTccMethodInLocalTransaction(MethodInvocation invocation) {
