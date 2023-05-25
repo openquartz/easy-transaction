@@ -43,7 +43,8 @@ public class ScheduledTransactionCompensate implements AutoCloseable {
             .scheduleWithFixedDelay(() -> {
                     try {
 
-                        Instant instant = LocalDateTime.now().plusHours(-transactionProperties.getCompensateBackOffHours())
+                        Instant instant = LocalDateTime.now()
+                            .plusHours(-transactionProperties.getCompensateBackOffHours())
                             .atZone(ZoneId.systemDefault())
                             .toInstant();
                         Date startCompensateTime = Date.from(instant);
