@@ -24,9 +24,11 @@ public class ScheduledTransactionCompensate implements AutoCloseable {
     private final TransactionProperties transactionProperties;
     private final TransactionCompensateFactory transactionCompensateFactory;
 
-    public ScheduledTransactionCompensate(TransactionCertificateRepository transactionCertificateRepository,
+    public ScheduledTransactionCompensate(
+        TransactionCertificateRepository transactionCertificateRepository,
         TransactionProperties transactionProperties,
-        TransactionCompensateFactory transactionCompensateFactory) {
+        TransactionCompensateFactory transactionCompensateFactory
+    ) {
 
         this.tccCompensateExecutor = new ScheduledThreadPoolExecutor(1,
             TransactionThreadFactory.create("et-tcc-self-recovery", true));

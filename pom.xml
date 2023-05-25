@@ -26,6 +26,7 @@
 
         <reflections.version>0.9.10</reflections.version>
         <disruptor.version>3.4.2</disruptor.version>
+        <mybatis-plus.version>3.5.0</mybatis-plus.version>
 
         <spring-boot.version>2.1.8.RELEASE</spring-boot.version>
 
@@ -94,6 +95,18 @@
                 <groupId>com.openquartz</groupId>
                 <artifactId>easytransaction-common</artifactId>
                 <version>${revision}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.openquartz</groupId>
+                <artifactId>easytransaction-spring-boot-starter</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>${mybatis-plus.version}</version>
             </dependency>
 
         </dependencies>
