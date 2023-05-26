@@ -30,20 +30,15 @@ public class AccountController {
     public Boolean payment(@RequestBody AccountDTO accountDO) {
         return accountService.payment(accountDO);
     }
-    
-    @RequestMapping("/testPayment")
-    public Boolean testPayment(@RequestBody AccountDTO accountDO) {
-        return accountService.testPayment(accountDO);
+
+    @RequestMapping("/confirm")
+    public Boolean confirm(@RequestBody AccountDTO accountDTO){
+        return accountService.confirm(accountDTO);
     }
-    
-    @RequestMapping("/mockWithTryException")
-    public Boolean mockWithTryException(@RequestBody AccountDTO accountDO) {
-        return accountService.mockWithTryException(accountDO);
-    }
-    
-    @RequestMapping("/mockWithTryTimeout")
-    public Boolean mockWithTryTimeout(@RequestBody AccountDTO accountDO) {
-        return accountService.mockWithTryTimeout(accountDO);
+
+    @RequestMapping("/cancel")
+    public Boolean cancel(@RequestBody AccountDTO accountDTO){
+        return accountService.cancel(accountDTO);
     }
     
     @RequestMapping("/paymentWithNested")
@@ -51,13 +46,24 @@ public class AccountController {
         return accountService.paymentWithNested(nestedDTO);
     }
     
-    @RequestMapping("/paymentWithNestedException")
-    public Boolean paymentWithNestedException(@RequestBody AccountNestedDTO nestedDTO) {
-        return accountService.paymentWithNestedException(nestedDTO);
-    }
-    
     @RequestMapping("/findByUserId")
     public BigDecimal findByUserId(@RequestParam("userId") String userId) {
         return accountService.findByUserId(userId).getBalance();
+    }
+
+    /**
+     * cancel nest
+     */
+    @RequestMapping("/confirmNested")
+    public Boolean confirmNested(@RequestBody AccountNestedDTO accountNestedDTO){
+        return accountService.confirmNested(accountNestedDTO);
+    }
+
+    /**
+     * cancelNested
+     */
+    @RequestMapping("/cancelNested")
+    public Boolean cancelNested(@RequestBody AccountNestedDTO accountNestedDTO){
+        return accountService.cancelNested(accountNestedDTO);
     }
 }

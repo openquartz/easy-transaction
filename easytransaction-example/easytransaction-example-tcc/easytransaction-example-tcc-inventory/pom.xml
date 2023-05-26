@@ -84,11 +84,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>com.openquartz</groupId>
-            <artifactId>easytransaction-spring-boot-starter</artifactId>
-        </dependency>
     </dependencies>
 
     <build>

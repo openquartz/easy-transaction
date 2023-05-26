@@ -1,6 +1,5 @@
 package com.openquartz.easytransaction.example.tcc.account.service.impl;
 
-import com.openquartz.easytransaction.core.annotation.Tcc;
 import com.openquartz.easytransaction.example.tcc.account.client.InventoryClient;
 import com.openquartz.easytransaction.example.tcc.account.client.entity.InventoryDTO;
 import com.openquartz.easytransaction.example.tcc.account.controller.entity.AccountDTO;
@@ -28,9 +27,9 @@ public class AccountServiceImpl implements AccountService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AccountServiceImpl.class);
 
     private final AccountMapper accountMapper;
-    
+
     private final InventoryClient inventoryClient;
-    
+
     /**
      * Instantiates a new Account service.
      *
@@ -43,57 +42,20 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    @Tcc(confirmMethod = "confirm", cancelMethod = "cancel")
     public boolean payment(final AccountDTO accountDTO) {
         LOGGER.info("============执行try付款接口===============");
         accountMapper.update(accountDTO);
         return Boolean.TRUE;
     }
-    
+
     @Override
-    public boolean testPayment(AccountDTO accountDTO) {
-        accountMapper.testUpdate(accountDTO);
-        return Boolean.TRUE;
-    }
-    
-    @Override
-    @Tcc(confirmMethod = "confirm", cancelMethod = "cancel")
-    public boolean mockWithTryException(AccountDTO accountDTO) {
-        throw new RuntimeException("账户扣减异常！");
-    }
-    
-    @Override
-    @Tcc(confirmMethod = "confirm", cancelMethod = "cancel")
-    public boolean mockWithTryTimeout(AccountDTO accountDTO) {
-        try {
-            //模拟延迟 当前线程暂停10秒
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        int decrease = accountMapper.update(accountDTO);
-        if (decrease != 1) {
-            throw new RuntimeException("账户余额不足");
-        }
-        return true;
-    }
-    
-    @Override
-    @Tcc(confirmMethod = "confirmNested", cancelMethod = "cancelNested")
+    @Transactional(rollbackFor = Exception.class)
     public boolean paymentWithNested(AccountNestedDTO nestedDTO) {
         accountMapper.update(buildAccountDTO(nestedDTO));
         inventoryClient.decrease(buildInventoryDTO(nestedDTO));
         return Boolean.TRUE;
     }
-    
-    @Override
-    @Tcc(confirmMethod = "confirmNested", cancelMethod = "cancelNested")
-    public boolean paymentWithNestedException(AccountNestedDTO nestedDTO) {
-        accountMapper.update(buildAccountDTO(nestedDTO));
-        inventoryClient.mockWithTryException(buildInventoryDTO(nestedDTO));
-        return Boolean.TRUE;
-    }
-    
+
     @Override
     public AccountDO findByUserId(final String userId) {
         return accountMapper.findByUserId(userId);
@@ -103,50 +65,56 @@ public class AccountServiceImpl implements AccountService {
      * Confirm boolean.
      *
      * @param accountDTO the account dto
-     * @return the boolean
      */
+    @Transactional(rollbackFor = Exception.class)
     public boolean confirm(final AccountDTO accountDTO) {
         LOGGER.info("============执行confirm 付款接口===============");
         return accountMapper.confirm(accountDTO) > 0;
     }
 
-
     /**
      * Cancel boolean.
      *
      * @param accountDTO the account dto
-     * @return the boolean
      */
+    @Transactional(rollbackFor = Exception.class)
     public boolean cancel(final AccountDTO accountDTO) {
         LOGGER.info("============执行cancel 付款接口===============");
         return accountMapper.cancel(accountDTO) > 0;
     }
-    
+
     @Transactional(rollbackFor = Exception.class)
-    public boolean confirmNested(AccountNestedDTO accountNestedDTO) {
+    public boolean confirmNested(final AccountNestedDTO accountNestedDTO) {
         LOGGER.info("============confirmNested确认付款接口===============");
-        return accountMapper.confirm(buildAccountDTO(accountNestedDTO)) > 0;
+        boolean confirm = accountMapper.confirm(buildAccountDTO(accountNestedDTO)) > 0;
+        if (confirm) {
+            return inventoryClient.confirm(buildInventoryDTO(accountNestedDTO));
+        }
+        return false;
     }
-    
+
     /**
      * Cancel nested boolean.
      *
      * @param accountNestedDTO the account nested dto
-     * @return the boolean
      */
     @Transactional(rollbackFor = Exception.class)
     public boolean cancelNested(AccountNestedDTO accountNestedDTO) {
         LOGGER.info("============cancelNested 执行取消付款接口===============");
-        return accountMapper.cancel(buildAccountDTO(accountNestedDTO)) > 0;
+        boolean cancel = accountMapper.cancel(buildAccountDTO(accountNestedDTO)) > 0;
+        if (cancel){
+            return inventoryClient.cancel(buildInventoryDTO(accountNestedDTO));
+        }
+        return false;
     }
-    
+
     private AccountDTO buildAccountDTO(AccountNestedDTO nestedDTO) {
         AccountDTO dto = new AccountDTO();
         dto.setAmount(nestedDTO.getAmount());
         dto.setUserId(nestedDTO.getUserId());
         return dto;
     }
-    
+
     private InventoryDTO buildInventoryDTO(AccountNestedDTO nestedDTO) {
         InventoryDTO inventoryDTO = new InventoryDTO();
         inventoryDTO.setCount(nestedDTO.getCount());

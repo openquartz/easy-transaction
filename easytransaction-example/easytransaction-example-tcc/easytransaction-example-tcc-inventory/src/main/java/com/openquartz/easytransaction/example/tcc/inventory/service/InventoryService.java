@@ -18,15 +18,21 @@ public interface InventoryService {
      * @return true boolean
      */
     Boolean decrease(InventoryDTO inventoryDTO);
-    
+
     /**
-     * Test decrease boolean.
-     *
-     * @param inventoryDTO the inventory dto
-     * @return the boolean
+     * tcc confirm method
+     * @param inventoryDTO inventory
+     * @return result
      */
-    Boolean testDecrease(InventoryDTO inventoryDTO);
-    
+    Boolean confirm(InventoryDTO inventoryDTO);
+
+    /**
+     * cancel method
+     * @param inventoryDTO inventoryDTO
+     * @return boolean
+     */
+    Boolean cancel(InventoryDTO inventoryDTO);
+
     /**
      * 获取商品库存信息.
      *
@@ -34,20 +40,5 @@ public interface InventoryService {
      * @return InventoryDO inventory do
      */
     InventoryDO findByProductId(String productId);
-    
-    /**
-     * mock 库存扣减try阶段异常.
-     *
-     * @param inventoryDTO dto
-     * @return true boolean
-     */
-    Boolean mockWithTryException(InventoryDTO inventoryDTO);
-    
-    /**
-     * mock 库存扣减try阶段超时.
-     *
-     * @param inventoryDTO dto
-     * @return true boolean
-     */
-    Boolean mockWithTryTimeout(InventoryDTO inventoryDTO);
+
 }

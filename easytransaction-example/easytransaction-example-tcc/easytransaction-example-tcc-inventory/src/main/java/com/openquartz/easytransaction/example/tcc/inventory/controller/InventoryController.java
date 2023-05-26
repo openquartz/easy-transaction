@@ -26,24 +26,19 @@ public class InventoryController {
     public Boolean decrease(@RequestBody InventoryDTO inventoryDTO) {
         return inventoryService.decrease(inventoryDTO);
     }
-    
-    @RequestMapping("/testDecrease")
-    public Boolean testDecrease(@RequestBody InventoryDTO inventoryDTO) {
-        return inventoryService.testDecrease(inventoryDTO);
+
+    @RequestMapping("/confirm")
+    public Boolean confirm(@RequestBody InventoryDTO inventoryDTO) {
+        return inventoryService.confirm(inventoryDTO);
+    }
+
+    @RequestMapping("/cancel")
+    public Boolean cancel(@RequestBody InventoryDTO inventoryDTO) {
+        return inventoryService.cancel(inventoryDTO);
     }
 
     @RequestMapping("/findByProductId")
     public Integer findByProductId(@RequestParam("productId") String productId) {
         return inventoryService.findByProductId(productId).getTotalInventory();
-    }
-
-    @RequestMapping("/mockWithTryException")
-    public Boolean mockWithTryException(@RequestBody InventoryDTO inventoryDTO) {
-        return inventoryService.mockWithTryException(inventoryDTO);
-    }
-
-    @RequestMapping("/mockWithTryTimeout")
-    public Boolean mockWithTryTimeout(@RequestBody InventoryDTO inventoryDTO) {
-        return inventoryService.mockWithTryTimeout(inventoryDTO);
     }
 }

@@ -1,19 +1,3 @@
-/*
- * Copyright 2017-2021 Dromara.org
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.openquartz.easytransaction.example.tcc.order.service.impl;
 
 import com.openquartz.easytransaction.example.tcc.order.common.IdWorkerUtils;
@@ -53,46 +37,8 @@ public class OrderServiceImpl implements OrderService {
         Order order = saveOrder(count, amount);
         long start = System.currentTimeMillis();
         paymentService.makePayment(order);
-        System.out.println("hmily-cloud分布式事务耗时：" + (System.currentTimeMillis() - start));
+        System.out.println("分布式事务耗时：" + (System.currentTimeMillis() - start));
         return "success";
-    }
-    
-    @Override
-    public String testOrderPay(Integer count, BigDecimal amount) {
-        Order order = saveOrder(count, amount);
-        paymentService.testMakePayment(order);
-        return "success";
-    }
-    
-    @Override
-    public String mockInventoryWithTryException(Integer count, BigDecimal amount) {
-        Order order = saveOrder(count, amount);
-        return paymentService.mockPaymentInventoryWithTryException(order);
-    }
-    
-    @Override
-    public String mockAccountWithTryException(Integer count, BigDecimal amount) {
-        Order order = saveOrder(count, amount);
-        return paymentService.mockPaymentAccountWithTryException(order);
-    }
-    
-    /**
-     * 模拟在订单支付操作中，库存在try阶段中的timeout
-     *
-     * @param count  购买数量
-     * @param amount 支付金额
-     * @return string
-     */
-    @Override
-    public String mockInventoryWithTryTimeout(Integer count, BigDecimal amount) {
-        Order order = saveOrder(count, amount);
-        return paymentService.mockPaymentInventoryWithTryTimeout(order);
-    }
-    
-    @Override
-    public String mockAccountWithTryTimeout(Integer count, BigDecimal amount) {
-        Order order = saveOrder(count, amount);
-        return paymentService.mockPaymentAccountWithTryTimeout(order);
     }
     
     @Override
@@ -100,18 +46,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = saveOrder(count, amount);
         return paymentService.makePaymentWithNested(order);
     }
-    
-    @Override
-    public String orderPayWithNestedException(Integer count, BigDecimal amount) {
-        Order order = saveOrder(count, amount);
-        return paymentService.makePaymentWithNestedException(order);
-    }
-    
-    @Override
-    public void updateOrderStatus(Order order) {
-        orderMapper.update(order);
-    }
-    
+
     private Order saveOrder(Integer count, BigDecimal amount) {
         final Order order = buildOrder(count, amount);
         orderMapper.save(order);
