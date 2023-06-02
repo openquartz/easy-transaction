@@ -12,8 +12,6 @@ import java.math.BigDecimal;
  */
 @Data
 public class AccountNestedDTO implements Serializable {
-
-    private static final long serialVersionUID = 7223470850578998427L;
     
     /**
      * 用户id.
