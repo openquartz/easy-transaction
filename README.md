@@ -70,6 +70,9 @@
         LOGGER.info("=========进行订单cancel操作完成================");
     }
 ```
+
+### 特性
+#### 超时&重试
 同时注解支持设置事务超时时间设置以及重试设置
 ```java
 /**
@@ -104,4 +107,17 @@ public @interface Tcc {
      */
     long retryInterval() default 0;
 }
+```
+
+### 扩展异步支持
+
+TCC执行Try 完成后。调用Confirm方法或者Cancel方法可以扩展自定义异步框架驱动或MQ、Job支持等。系统默认支持使用当前线程执行。
+如需扩展需要继承接口`java.util.concurrent.Executor`
+并注入到Spring工厂中.替换为自定义的实现
+```java
+    @Bean
+    @ConditionalOnMissingBean
+    public Executor triggerExecutor() {
+        return new DirectExecutor();
+    }
 ```

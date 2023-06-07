@@ -1,5 +1,6 @@
 package com.openquartz.easytransaction.starter.spring.boot.autoconfig;
 
+import com.openquartz.easytransaction.common.concurrent.DirectExecutor;
 import com.openquartz.easytransaction.core.compensate.ScheduledTransactionCompensate;
 import com.openquartz.easytransaction.core.compensate.TransactionCompensateFactory;
 import com.openquartz.easytransaction.core.compensate.TransactionCompensateFactoryImpl;
@@ -18,6 +19,7 @@ import com.openquartz.easytransaction.starter.spring.boot.autoconfig.properties.
 import com.openquartz.easytransaction.starter.transaction.SpringTransactionSupport;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.Advisor;
@@ -116,9 +118,17 @@ public class EasyTransactionAutoConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public TccTriggerEngine tccTrigger(TransactionSupport transactionSupport,
+    public Executor triggerExecutor() {
+        return new DirectExecutor();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TccTriggerEngine tccTrigger(
+        Executor triggerExecutor,
+        TransactionSupport transactionSupport,
         TransactionCertificateRepository transactionCertificateRepository) {
-        return new TccTriggerEngineImpl(transactionSupport, transactionCertificateRepository);
+        return new TccTriggerEngineImpl(triggerExecutor, transactionSupport, transactionCertificateRepository);
     }
 
     @Bean
@@ -129,7 +139,8 @@ public class EasyTransactionAutoConfig {
         TransactionCertificateRepository transactionCertificateRepository,
         EasyTransactionProperties easyTransactionProperties
     ) {
-        TccTryMethodInterceptor interceptor = new TccTryMethodInterceptor(tccTriggerEngine, globalTransactionIdGenerator,
+        TccTryMethodInterceptor interceptor = new TccTryMethodInterceptor(tccTriggerEngine,
+            globalTransactionIdGenerator,
             transactionSupport, transactionCertificateRepository);
         TccAnnotationAdvisor advisor = new TccAnnotationAdvisor(interceptor);
         advisor.setOrder(easyTransactionProperties.getTransactionAdvisorOrder());

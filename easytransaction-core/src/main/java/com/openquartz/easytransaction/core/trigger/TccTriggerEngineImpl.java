@@ -4,16 +4,21 @@ import com.openquartz.easytransaction.repository.api.TransactionCertificateRepos
 import com.openquartz.easytransaction.repository.api.model.TransactionCertificate;
 import com.openquartz.easytransaction.core.transaction.TransactionSupport;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class TccTriggerEngineImpl implements TccTriggerEngine {
 
+    private final Executor triggerExecutor;
     private final TransactionSupport transactionSupport;
     private final TransactionCertificateRepository transactionCertificateRepository;
 
-    public TccTriggerEngineImpl(TransactionSupport transactionSupport,
+    public TccTriggerEngineImpl(
+        Executor triggerExecutor,
+        TransactionSupport transactionSupport,
         TransactionCertificateRepository transactionCertificateRepository) {
+        this.triggerExecutor = triggerExecutor;
         this.transactionSupport = transactionSupport;
         this.transactionCertificateRepository = transactionCertificateRepository;
     }
@@ -25,33 +30,35 @@ public class TccTriggerEngineImpl implements TccTriggerEngine {
      */
     public void cancel(TransactionCertificate transactionCertificate) {
 
-        if (Objects.isNull(transactionCertificate.getCancelMethod())) {
-            transactionSupport.executeNewTransaction(() -> {
-                transactionCertificateRepository.finish(transactionCertificate);
-                return true;
-            });
-            return;
-        }
+        triggerExecutor.execute(() -> {
+                if (Objects.isNull(transactionCertificate.getCancelMethod())) {
+                    transactionSupport.executeNewTransaction(() -> {
+                        transactionCertificateRepository.finish(transactionCertificate);
+                        return true;
+                    });
+                    return;
+                }
 
-        // cancel
-        transactionSupport.executeNewTransaction(() -> {
-            transactionCertificateRepository.cancel(transactionCertificate);
-            return true;
-        });
+                // cancel
+                transactionSupport.executeNewTransaction(() -> {
+                    transactionCertificateRepository.cancel(transactionCertificate);
+                    return true;
+                });
 
-        try {
-            transactionCertificate.getCancelMethod().invoke(transactionCertificate.getParam());
+                try {
+                    transactionCertificate.getCancelMethod().invoke(transactionCertificate.getParam());
 
-            // finished
-            transactionSupport.executeNewTransaction(() -> {
-                transactionCertificateRepository.finish(transactionCertificate);
-                return true;
-            });
-        } catch (Throwable ex) {
-            log.error("[TccTryMethodInterceptor#cancel] Failed to cancel! transactionId:{}",
-                transactionCertificate.getTransactionId(), ex);
-        }
-
+                    // finished
+                    transactionSupport.executeNewTransaction(() -> {
+                        transactionCertificateRepository.finish(transactionCertificate);
+                        return true;
+                    });
+                } catch (Throwable ex) {
+                    log.error("[TccTryMethodInterceptor#cancel] Failed to cancel! transactionId:{}",
+                        transactionCertificate.getTransactionId(), ex);
+                }
+            }
+        );
     }
 
     /**
@@ -61,27 +68,32 @@ public class TccTriggerEngineImpl implements TccTriggerEngine {
      */
     public void confirm(TransactionCertificate transactionCertificate) {
 
-        if (Objects.isNull(transactionCertificate.getConfirmMethod())) {
-            transactionSupport.executeNewTransaction(() -> {
-                transactionCertificateRepository.finish(transactionCertificate);
-                return true;
-            });
-            return;
-        }
+        triggerExecutor.execute(() -> {
 
-        try {
-            transactionCertificate.getConfirmMethod().invoke(transactionCertificate.getParam());
+            if (Objects.isNull(transactionCertificate.getConfirmMethod())) {
+                transactionSupport.executeNewTransaction(() -> {
+                    transactionCertificateRepository.finish(transactionCertificate);
+                    return true;
+                });
+                return;
+            }
 
-            // finished
-            transactionSupport.executeNewTransaction(() -> {
-                transactionCertificateRepository.finish(transactionCertificate);
-                return true;
-            });
+            try {
+                transactionCertificate.getConfirmMethod().invoke(transactionCertificate.getParam());
 
-        } catch (Throwable ex) {
-            log.error("[TccTryMethodInterceptor#confirm] Failed to confirm! transactionId:{}",
-                transactionCertificate.getTransactionId(), ex);
-        }
+                // finished
+                transactionSupport.executeNewTransaction(() -> {
+                    transactionCertificateRepository.finish(transactionCertificate);
+                    return true;
+                });
+
+            } catch (Throwable ex) {
+                log.error("[TccTryMethodInterceptor#confirm] Failed to confirm! transactionId:{}",
+                    transactionCertificate.getTransactionId(), ex);
+            }
+
+        });
+
     }
 
 }

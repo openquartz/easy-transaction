@@ -2,6 +2,7 @@ package com.openquartz.easytransaction.common.concurrent;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
+import org.springframework.lang.NonNull;
 
 /**
  * custom thread factory.
@@ -35,7 +36,7 @@ public final class TransactionThreadFactory implements ThreadFactory {
     }
 
     @Override
-    public Thread newThread(final Runnable runnable) {
+    public Thread newThread(@NonNull final Runnable runnable) {
         Thread thread = new Thread(THREAD_GROUP, runnable,
                 THREAD_GROUP.getName() + "-" + namePrefix + "-" + THREAD_NUMBER.getAndIncrement());
         thread.setDaemon(daemon);
