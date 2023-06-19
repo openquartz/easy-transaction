@@ -32,7 +32,7 @@ CREATE TABLE `et_transaction_certificate_entity`
     `version`            int          NOT NULL DEFAULT '0' COMMENT '数据版本',
     PRIMARY KEY (`id`),
     UNIQUE KEY `idx_transaction_id` (`transaction_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='事务凭证';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='事务凭证';
 ```
 
 ### 使用注解
