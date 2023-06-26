@@ -25,15 +25,15 @@ public class JdbcTransactionCertificateRepositoryImpl implements TransactionCert
     private final JdbcTemplate jdbcTemplate;
 
     private static final String INSERT_SQL =
-        "insert into et_transaction_certificate_entity (transaction_id, certificate_status, created_time, finished_time, updated_time, confirm_method,`param`, cancel_method, retry_count, version)\n"
-            + "values (?,?,?,?,?,?,?,?,?)";
+        "insert into et_transaction_certificate_entity (transaction_id,transaction_group_id, certificate_status, created_time, finished_time, updated_time, confirm_method,`param`, cancel_method, retry_count, version)\n"
+            + "values (?,?,?,?,?,?,?,?,?,?)";
     private static final String REFRESH_STATUS_SQL = "update et_transaction_certificate_entity set certificate_status=?,updated_time=now(),version = version+1 where transaction_id=? and version=?";
 
     private static final String FINISH_SQL = "update et_transaction_certificate_entity set certificate_status=?,updated_time=now(),finished_time=?,version = version+1 where transaction_id=? and version=?";
 
     private static final String START_RETRY_SQL = "update et_transaction_certificate_entity set version=version+1,updated_time=now(),retry_count=retry_count+1 where transaction_id=? and version=?";
 
-    private static final String GET_COMPENSATE_SQL = "select id,transaction_id, certificate_status, created_time, finished_time, updated_time, confirm_method,`param`, cancel_method, retry_count, version from et_transaction_certificate_entity where certificate_status in (:certificateStatus) and updated_time >= :startTime and updatedTime < :endTime limit :offset";
+    private static final String GET_COMPENSATE_SQL = "select id,transaction_id,transaction_group_id, certificate_status, created_time, finished_time, updated_time, confirm_method,`param`, cancel_method, retry_count, version from et_transaction_certificate_entity where certificate_status in (:certificateStatus) and updated_time >= :startTime and updatedTime < :endTime limit :offset";
 
     public JdbcTransactionCertificateRepositoryImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -46,10 +46,17 @@ public class JdbcTransactionCertificateRepositoryImpl implements TransactionCert
     }
 
     private void save(TransactionCertificateEntity entity) {
-        jdbcTemplate.update(INSERT_SQL, entity.getTransactionId(), entity.getCertificateStatus(),
+        jdbcTemplate.update(INSERT_SQL, entity.getTransactionId(),
+            entity.getTransactionGroupId(),
+            entity.getCertificateStatus(),
             entity.getCreatedTime(),
-            entity.getFinishedTime(), entity.getUpdatedTime(), entity.getConfirmMethod(), entity.getParam(),
-            entity.getCancelMethod(), entity.getRetryCount(), entity.getVersion());
+            entity.getFinishedTime(),
+            entity.getUpdatedTime(),
+            entity.getConfirmMethod(),
+            entity.getParam(),
+            entity.getCancelMethod(),
+            entity.getRetryCount(),
+            entity.getVersion());
     }
 
     @Override
@@ -140,6 +147,7 @@ public class JdbcTransactionCertificateRepositoryImpl implements TransactionCert
                 TransactionCertificateEntity entity = new TransactionCertificateEntity();
                 entity.setId(rs.getLong("id"));
                 entity.setTransactionId(rs.getString("transaction_id"));
+                entity.setTransactionGroupId(rs.getString("transaction_group_id"));
                 entity.setCertificateStatus(rs.getInt("certificate_status"));
                 entity.setCreatedTime(rs.getDate("created_time"));
                 entity.setFinishedTime(rs.getDate("finished_time"));

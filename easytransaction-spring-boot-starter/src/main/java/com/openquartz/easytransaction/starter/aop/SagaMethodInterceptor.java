@@ -2,37 +2,38 @@ package com.openquartz.easytransaction.starter.aop;
 
 import com.openquartz.easytransaction.common.exception.ExceptionUtils;
 import com.openquartz.easytransaction.common.json.JSONUtil;
+import com.openquartz.easytransaction.common.lang.Pair;
 import com.openquartz.easytransaction.common.retry.RetryUtil;
+import com.openquartz.easytransaction.core.annotation.Saga;
+import com.openquartz.easytransaction.core.generator.GlobalTransactionIdGenerator;
+import com.openquartz.easytransaction.core.transaction.SagaTransactionContext;
+import com.openquartz.easytransaction.core.transaction.TransactionSupport;
+import com.openquartz.easytransaction.core.trigger.TccTriggerEngine;
 import com.openquartz.easytransaction.repository.api.TransactionCertificateRepository;
 import com.openquartz.easytransaction.repository.api.model.CertificateStatusEnum;
 import com.openquartz.easytransaction.repository.api.model.TransactionCertificate;
-import com.openquartz.easytransaction.core.annotation.Tcc;
-import com.openquartz.easytransaction.core.generator.GlobalTransactionIdGenerator;
-import com.openquartz.easytransaction.core.transaction.TransactionSupport;
-import com.openquartz.easytransaction.core.trigger.TccTriggerEngine;
-
 import java.lang.reflect.Method;
 import java.util.Date;
-import java.util.concurrent.*;
-
-import lombok.extern.slf4j.Slf4j;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 /**
- * Tcc implementation method interceptor
+ * Saga Method Transaction Interceptor
  *
  * @author svnee
- **/
-@Slf4j
-public class TccTryMethodInterceptor implements MethodInterceptor {
+ */
+public class SagaMethodInterceptor implements MethodInterceptor {
 
     private final TccTriggerEngine tccTriggerEngine;
     private final GlobalTransactionIdGenerator globalTransactionIdGenerator;
     private final TransactionSupport transactionSupport;
     private final TransactionCertificateRepository transactionCertificateRepository;
 
-    public TccTryMethodInterceptor(TccTriggerEngine tccTriggerEngine,
+    public SagaMethodInterceptor(TccTriggerEngine tccTriggerEngine,
         GlobalTransactionIdGenerator globalTransactionIdGenerator,
         TransactionSupport transactionSupport,
         TransactionCertificateRepository transactionCertificateRepository) {
@@ -46,27 +47,30 @@ public class TccTryMethodInterceptor implements MethodInterceptor {
     public Object invoke(MethodInvocation invocation) {
 
         // register method in local transaction
-        TransactionCertificate transactionCertificate = registerTccMethodInLocalTransaction(invocation);
+        Pair<String, Boolean> sagaTransactionGroupPair = SagaTransactionContext
+            .currentSagaTransactionGroupId(globalTransactionIdGenerator);
+        try {
+            TransactionCertificate transactionCertificate =
+                registerSagaMethodInLocalTransaction(invocation, sagaTransactionGroupPair.getK());
 
-        Tcc annotation = invocation.getMethod().getDeclaredAnnotation(Tcc.class);
-        Object tryResult = executeTryMethod(invocation, annotation);
+            Saga annotation = invocation.getMethod().getDeclaredAnnotation(Saga.class);
+            Object tryResult = executeConfirmMethod(invocation, annotation);
 
-        // try success
-        transactionSupport.executeNewTransaction(() -> {
-            transactionCertificateRepository.trySuccess(transactionCertificate);
-            return true;
-        });
+            // confirm success
+            transactionSupport.executeNewTransaction(() -> {
+                transactionCertificateRepository.confirm(transactionCertificate);
+                return true;
+            });
 
-        // do in transaction if execute success
-        transactionSupport.execute(() -> {
-            transactionCertificateRepository.confirm(transactionCertificate);
-            return true;
-        });
-
-        return tryResult;
+            return tryResult;
+        } finally {
+            if (Boolean.TRUE.equals(sagaTransactionGroupPair.getV())) {
+                SagaTransactionContext.clear();
+            }
+        }
     }
 
-    private Object executeTryMethod(MethodInvocation invocation, Tcc annotation) {
+    private Object executeConfirmMethod(MethodInvocation invocation, Saga annotation) {
 
         // 执行次数
         int retryCount = (annotation.retryCount() > 0) ? annotation.retryCount() + 1 : 1;
@@ -97,44 +101,41 @@ public class TccTryMethodInterceptor implements MethodInterceptor {
      * @param invocation invocation
      * @return transaction certificate
      */
-    private TransactionCertificate registerTccMethodInLocalTransaction(MethodInvocation invocation) {
+    private TransactionCertificate registerSagaMethodInLocalTransaction(MethodInvocation invocation,
+        String sagaTransactionGroup) {
+
         TransactionCertificate transactionCertificate = transactionSupport.executeNewTransaction(() -> {
             // 注册Try method transaction
-            return registerTryTcc(invocation);
+            return registerTryTcc(invocation, sagaTransactionGroup);
         });
 
-        // confirm
-        transactionSupport.executeAfterCommit(() -> tccTriggerEngine.confirm(transactionCertificate));
-
-        // cancel
+        // rollback method
         transactionSupport.executeAfterRollback(() -> tccTriggerEngine.cancel(transactionCertificate));
         return transactionCertificate;
     }
 
 
-    private TransactionCertificate registerTryTcc(MethodInvocation invocation) {
+    private TransactionCertificate registerTryTcc(MethodInvocation invocation, String sagaTransactionGroup) {
 
         Object[] arguments = invocation.getArguments();
         Object argument = arguments[0];
         String paramJson = JSONUtil.toClassJson(argument);
 
-        Tcc annotation = invocation.getMethod().getDeclaredAnnotation(Tcc.class);
-        String cancelMethodName = annotation.cancelMethod();
-        String confirmMethodName = annotation.confirmMethod();
+        Saga annotation = invocation.getMethod().getDeclaredAnnotation(Saga.class);
+        String cancelMethodName = annotation.rollbackMethod();
 
         Method cancelMethod = parseMethod(invocation.getThis().getClass(), cancelMethodName);
-        Method confirmMethod = parseMethod(invocation.getThis().getClass(), confirmMethodName);
 
         // generate global transaction identifier
         String transactionId = globalTransactionIdGenerator.generateGlobalTransactionId();
 
         TransactionCertificate transactionCertificate = new TransactionCertificate();
         transactionCertificate.setTransactionId(transactionId);
-        transactionCertificate.setTransactionGroupId(transactionId);
+        transactionCertificate.setTransactionGroupId(sagaTransactionGroup);
         transactionCertificate.setCertificateStatus(CertificateStatusEnum.INIT);
         transactionCertificate.setCreatedTime(new Date());
         transactionCertificate.setUpdatedTime(new Date());
-        transactionCertificate.setConfirmMethod(confirmMethod);
+        transactionCertificate.setConfirmMethod(null);
         transactionCertificate.setParam(paramJson);
         transactionCertificate.setCancelMethod(cancelMethod);
         transactionCertificate.setRetryCount(0);

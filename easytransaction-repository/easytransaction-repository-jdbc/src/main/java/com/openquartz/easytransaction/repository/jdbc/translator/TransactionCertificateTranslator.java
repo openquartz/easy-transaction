@@ -1,6 +1,7 @@
 package com.openquartz.easytransaction.repository.jdbc.translator;
 
 import com.openquartz.easytransaction.common.json.JSONUtil;
+import com.openquartz.easytransaction.common.lang.StringUtils;
 import com.openquartz.easytransaction.repository.api.model.CertificateStatusEnum;
 import com.openquartz.easytransaction.repository.api.model.TransactionCertificate;
 import com.openquartz.easytransaction.repository.jdbc.model.TransactionCertificateEntity;
@@ -21,6 +22,7 @@ public final class TransactionCertificateTranslator {
     public static TransactionCertificate translate(TransactionCertificateEntity entity) {
         TransactionCertificate transactionCertificate = new TransactionCertificate();
         transactionCertificate.setTransactionId(entity.getTransactionId());
+        transactionCertificate.setTransactionGroupId(entity.getTransactionGroupId());
         transactionCertificate.setCertificateStatus(CertificateStatusEnum.of(entity.getCertificateStatus()));
         transactionCertificate.setCreatedTime(entity.getCreatedTime());
         transactionCertificate.setFinishedTime(entity.getFinishedTime());
@@ -43,6 +45,7 @@ public final class TransactionCertificateTranslator {
     public static TransactionCertificateEntity translate2Entity(TransactionCertificate entity) {
         TransactionCertificateEntity transactionCertificateEntity = new TransactionCertificateEntity();
         transactionCertificateEntity.setTransactionId(entity.getTransactionId());
+        transactionCertificateEntity.setTransactionGroupId(entity.getTransactionGroupId());
         transactionCertificateEntity.setCertificateStatus(entity.getCertificateStatus().getCode());
         transactionCertificateEntity.setCreatedTime(entity.getCreatedTime());
         transactionCertificateEntity.setFinishedTime(entity.getFinishedTime());
@@ -63,7 +66,7 @@ public final class TransactionCertificateTranslator {
      */
     private static String formatMethod(Method method) {
         if (method == null) {
-            return "";
+            return StringUtils.EMPTY;
         }
         return method.getDeclaringClass().getName() + METHOD_SPLITTER + method.getName();
     }

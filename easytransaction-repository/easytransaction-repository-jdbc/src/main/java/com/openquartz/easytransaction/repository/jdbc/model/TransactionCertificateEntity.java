@@ -23,6 +23,11 @@ public class TransactionCertificateEntity {
     private String transactionId;
 
     /**
+     * 事务组ID
+     */
+    private String transactionGroupId;
+
+    /**
      * 凭证状态
      */
     private Integer certificateStatus;

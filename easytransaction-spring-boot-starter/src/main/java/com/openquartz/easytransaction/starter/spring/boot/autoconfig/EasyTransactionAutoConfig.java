@@ -12,6 +12,8 @@ import com.openquartz.easytransaction.core.trigger.TccTriggerEngine;
 import com.openquartz.easytransaction.core.trigger.TccTriggerEngineImpl;
 import com.openquartz.easytransaction.repository.api.TransactionCertificateRepository;
 import com.openquartz.easytransaction.repository.jdbc.JdbcTransactionCertificateRepositoryImpl;
+import com.openquartz.easytransaction.starter.aop.SagaAnnotationAdvisor;
+import com.openquartz.easytransaction.starter.aop.SagaMethodInterceptor;
 import com.openquartz.easytransaction.starter.aop.TccAnnotationAdvisor;
 import com.openquartz.easytransaction.starter.aop.TccTryMethodInterceptor;
 import com.openquartz.easytransaction.starter.spring.boot.autoconfig.properties.EasyTransactionProperties;
@@ -133,7 +135,7 @@ public class EasyTransactionAutoConfig {
 
     @Bean
     @Role(value = BeanDefinition.ROLE_INFRASTRUCTURE)
-    public Advisor fileExportExecutorAnnotationAdvisor(TccTriggerEngine tccTriggerEngine,
+    public Advisor tccAnnotationAdvisor(TccTriggerEngine tccTriggerEngine,
         GlobalTransactionIdGenerator globalTransactionIdGenerator,
         TransactionSupport transactionSupport,
         TransactionCertificateRepository transactionCertificateRepository,
@@ -143,6 +145,22 @@ public class EasyTransactionAutoConfig {
             globalTransactionIdGenerator,
             transactionSupport, transactionCertificateRepository);
         TccAnnotationAdvisor advisor = new TccAnnotationAdvisor(interceptor);
+        advisor.setOrder(easyTransactionProperties.getTransactionAdvisorOrder());
+        return advisor;
+    }
+
+    @Bean
+    @Role(value = BeanDefinition.ROLE_INFRASTRUCTURE)
+    public Advisor sagaAnnotationAdvisor(TccTriggerEngine tccTriggerEngine,
+        GlobalTransactionIdGenerator globalTransactionIdGenerator,
+        TransactionSupport transactionSupport,
+        TransactionCertificateRepository transactionCertificateRepository,
+        EasyTransactionProperties easyTransactionProperties
+    ) {
+        SagaMethodInterceptor interceptor = new SagaMethodInterceptor(tccTriggerEngine,
+            globalTransactionIdGenerator,
+            transactionSupport, transactionCertificateRepository);
+        SagaAnnotationAdvisor advisor = new SagaAnnotationAdvisor(interceptor);
         advisor.setOrder(easyTransactionProperties.getTransactionAdvisorOrder());
         return advisor;
     }

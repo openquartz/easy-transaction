@@ -18,6 +18,11 @@ public class TransactionCertificate {
     private String transactionId;
 
     /**
+     * 事务组ID
+     */
+    private String transactionGroupId;
+
+    /**
      * 凭证状态
      */
     private CertificateStatusEnum certificateStatus;
@@ -38,7 +43,7 @@ public class TransactionCertificate {
     private Date updatedTime;
 
     /**
-     * 取消 method
+     * confirm method
      */
     private Method confirmMethod;
 
@@ -48,7 +53,7 @@ public class TransactionCertificate {
     private Object param;
 
     /**
-     * 取消 method
+     * cancel method
      */
     private Method cancelMethod;
 
