@@ -1,10 +1,10 @@
 # EasyTransaction
-轻量级最大努力重试型TCC 分布式柔性事务解决方案
+轻量级最大努力重试型TCC、Saga 分布式柔性事务解决方案
 
 ## 原理
 本地事务凭证状态机
 
-![img.png](img.png)
+![img.png](doc/image/EasyTransaction.jpg)
 
 ## 使用指南
 ### 引入依赖
@@ -98,6 +98,7 @@ CREATE TABLE `et_transaction_certificate_entity`
 ## 特性
 ### 超时&重试
 同时注解支持设置事务超时时间设置以及重试设置
+#### TCC
 ```java
 /**
  * @author svnee
@@ -131,6 +132,46 @@ public @interface Tcc {
      */
     long retryInterval() default 0;
 }
+```
+
+#### Saga
+```java
+package com.openquartz.easytransaction.core.annotation;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * @author svnee
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface Saga {
+
+    /**
+     * 提交method
+     */
+    String rollbackMethod() default "";
+
+    /**
+     * 超时时间,单位：毫秒 默认不超时
+     */
+    long timeout() default Long.MAX_VALUE;
+
+    /**
+     * saga confirm method 重试次数。默认 不重试
+     */
+    int retryCount() default 0;
+
+    /**
+     * 重试时间间隔 单位：毫秒
+     */
+    long retryInterval() default 0;
+
+}
+
 ```
 
 ### 扩展异步支持
