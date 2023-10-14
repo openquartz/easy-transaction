@@ -5,15 +5,14 @@ import com.openquartz.easytransaction.repository.api.model.CertificateStatusEnum
 import com.openquartz.easytransaction.repository.api.model.TransactionCertificate;
 import com.openquartz.easytransaction.repository.jdbc.model.TransactionCertificateEntity;
 import com.openquartz.easytransaction.repository.jdbc.translator.TransactionCertificateTranslator;
-import java.util.Collections;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 /**
  * Jdbc Transaction
