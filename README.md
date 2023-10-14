@@ -39,7 +39,7 @@ CREATE TABLE `et_transaction_certificate_entity`
 使用注解在try 方法上,并在相同的类下提供confirm/cancel方法
 例如：
 ```java
-  @Override
+    @Override
     @Tcc(confirmMethod = "confirmOrderStatus", cancelMethod = "cancelOrderStatus")
     @Transactional(rollbackFor = Exception.class)
     public void makePayment(Order order) {
@@ -98,6 +98,9 @@ CREATE TABLE `et_transaction_certificate_entity`
 ## 特性
 ### 超时&重试
 同时注解支持设置事务超时时间设置以及重试设置
+
+TCC confirm method和cancel method 需要和 try method 需要在同一class类中
+
 #### TCC
 ```java
 /**
