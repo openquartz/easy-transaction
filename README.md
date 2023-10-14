@@ -99,9 +99,9 @@ CREATE TABLE `et_transaction_certificate_entity`
 ### 超时&重试
 同时注解支持设置事务超时时间设置以及重试设置
 
-TCC confirm method和cancel method 需要和 try method 需要在同一class类中
-
 #### TCC
+
+TCC confirm method和cancel method 需要和 try method 需要在同一class类中
 ```java
 /**
  * @author svnee
@@ -138,6 +138,7 @@ public @interface Tcc {
 ```
 
 #### Saga
+Saga rollbackMethod 需要和 try method 需要在同一class类中
 ```java
 package com.openquartz.easytransaction.core.annotation;
 
