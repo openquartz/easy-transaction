@@ -7,6 +7,7 @@ import com.openquartz.easytransaction.common.retry.RetryUtil;
 import com.openquartz.easytransaction.core.annotation.Saga;
 import com.openquartz.easytransaction.core.generator.GlobalTransactionIdGenerator;
 import com.openquartz.easytransaction.core.transaction.SagaTransactionContext;
+import com.openquartz.easytransaction.core.transaction.TransactionIdContext;
 import com.openquartz.easytransaction.core.transaction.TransactionSupport;
 import com.openquartz.easytransaction.core.trigger.TccTriggerEngine;
 import com.openquartz.easytransaction.repository.api.TransactionCertificateRepository;
@@ -52,6 +53,7 @@ public class SagaMethodInterceptor implements MethodInterceptor {
         try {
             TransactionCertificate transactionCertificate =
                 registerSagaMethodInLocalTransaction(invocation, sagaTransactionGroupPair.getK());
+            TransactionIdContext.putCurrentTransactionId(transactionCertificate.getTransactionId());
 
             Saga annotation = invocation.getMethod().getDeclaredAnnotation(Saga.class);
             Object tryResult = executeConfirmMethod(invocation, annotation);
@@ -67,6 +69,7 @@ public class SagaMethodInterceptor implements MethodInterceptor {
             if (Boolean.TRUE.equals(sagaTransactionGroupPair.getV())) {
                 SagaTransactionContext.clear();
             }
+            TransactionIdContext.clear();
         }
     }
 

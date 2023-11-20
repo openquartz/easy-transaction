@@ -3,6 +3,7 @@ package com.openquartz.easytransaction.starter.aop;
 import com.openquartz.easytransaction.common.exception.ExceptionUtils;
 import com.openquartz.easytransaction.common.json.JSONUtil;
 import com.openquartz.easytransaction.common.retry.RetryUtil;
+import com.openquartz.easytransaction.core.transaction.TransactionIdContext;
 import com.openquartz.easytransaction.repository.api.TransactionCertificateRepository;
 import com.openquartz.easytransaction.repository.api.model.CertificateStatusEnum;
 import com.openquartz.easytransaction.repository.api.model.TransactionCertificate;
@@ -33,9 +34,9 @@ public class TccTryMethodInterceptor implements MethodInterceptor {
     private final TransactionCertificateRepository transactionCertificateRepository;
 
     public TccTryMethodInterceptor(TccTriggerEngine tccTriggerEngine,
-        GlobalTransactionIdGenerator globalTransactionIdGenerator,
-        TransactionSupport transactionSupport,
-        TransactionCertificateRepository transactionCertificateRepository) {
+                                   GlobalTransactionIdGenerator globalTransactionIdGenerator,
+                                   TransactionSupport transactionSupport,
+                                   TransactionCertificateRepository transactionCertificateRepository) {
         this.tccTriggerEngine = tccTriggerEngine;
         this.globalTransactionIdGenerator = globalTransactionIdGenerator;
         this.transactionSupport = transactionSupport;
@@ -46,24 +47,29 @@ public class TccTryMethodInterceptor implements MethodInterceptor {
     public Object invoke(MethodInvocation invocation) {
 
         // register method in local transaction
-        TransactionCertificate transactionCertificate = registerTccMethodInLocalTransaction(invocation);
+        try {
+            TransactionCertificate transactionCertificate = registerTccMethodInLocalTransaction(invocation);
+            TransactionIdContext.putCurrentTransactionId(transactionCertificate.getTransactionId());
 
-        Tcc annotation = invocation.getMethod().getDeclaredAnnotation(Tcc.class);
-        Object tryResult = executeTryMethod(invocation, annotation);
+            Tcc annotation = invocation.getMethod().getDeclaredAnnotation(Tcc.class);
+            Object tryResult = executeTryMethod(invocation, annotation);
 
-        // try success
-        transactionSupport.executeNewTransaction(() -> {
-            transactionCertificateRepository.trySuccess(transactionCertificate);
-            return true;
-        });
+            // try success
+            transactionSupport.executeNewTransaction(() -> {
+                transactionCertificateRepository.trySuccess(transactionCertificate);
+                return true;
+            });
 
-        // do in transaction if execute success
-        transactionSupport.execute(() -> {
-            transactionCertificateRepository.confirm(transactionCertificate);
-            return true;
-        });
+            // do in transaction if execute success
+            transactionSupport.execute(() -> {
+                transactionCertificateRepository.confirm(transactionCertificate);
+                return true;
+            });
 
-        return tryResult;
+            return tryResult;
+        } finally {
+            TransactionIdContext.clear();
+        }
     }
 
     private Object executeTryMethod(MethodInvocation invocation, Tcc annotation) {
@@ -74,14 +80,14 @@ public class TccTryMethodInterceptor implements MethodInterceptor {
         try {
             // future get
             FutureTask<Object> future = new FutureTask<>(
-                // retry invoke try method
-                () -> RetryUtil.retry(retryCount, annotation.retryInterval(), () -> {
-                    try {
-                        return invocation.proceed();
-                    } catch (Throwable e) {
-                        return ExceptionUtils.rethrow(e);
-                    }
-                }));
+                    // retry invoke try method
+                    () -> RetryUtil.retry(retryCount, annotation.retryInterval(), () -> {
+                        try {
+                            return invocation.proceed();
+                        } catch (Throwable e) {
+                            return ExceptionUtils.rethrow(e);
+                        }
+                    }));
             return future.get(annotation.timeout(), TimeUnit.MICROSECONDS);
         } catch (TimeoutException | ExecutionException e) {
             return ExceptionUtils.rethrow(e);
@@ -149,7 +155,7 @@ public class TccTryMethodInterceptor implements MethodInterceptor {
      * parse transaction method
      *
      * @param targetClass target class
-     * @param methodName method name
+     * @param methodName  method name
      * @return method
      */
     private static Method parseMethod(Class<?> targetClass, String methodName) {
